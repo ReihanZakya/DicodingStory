@@ -9,6 +9,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "session")
 
@@ -38,6 +40,8 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
         }
     }
 
+
+
     companion object {
         @Volatile
         private var INSTANCE: UserPreference? = null
@@ -52,6 +56,10 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
                 INSTANCE = instance
                 instance
             }
+        }
+
+        fun UserPreference.getUserBlocking(): UserModel {
+            return runBlocking { getSession().first() }
         }
     }
 }

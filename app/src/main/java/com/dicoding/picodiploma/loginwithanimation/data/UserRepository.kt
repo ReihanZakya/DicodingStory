@@ -16,10 +16,6 @@ class UserRepository private constructor(
     private val apiService: ApiService
 ) {
 
-//    suspend fun registerUser(name: String, email: String, password: String): RegisterResponse {
-//        return apiService.register(name, email, password)
-//    }
-
     suspend fun register(name: String, email: String, password: String): RegisterResponse {
         try {
             return apiService.register(name, email, password)

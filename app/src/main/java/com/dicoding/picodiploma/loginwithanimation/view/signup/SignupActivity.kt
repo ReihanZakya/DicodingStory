@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
@@ -27,6 +26,15 @@ class SignupActivity : AppCompatActivity() {
         binding = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.emailEditText.doOnTextChanged { text, _, _, _ ->
+            val emailInputLayout = binding.emailEditTextLayout
+            if (!isValidEmail(text.toString())) {
+                emailInputLayout.error = "Email tidak valid"
+            } else {
+                emailInputLayout.error = null
+            }
+        }
+
         binding.passwordEditText.doOnTextChanged { text, start, before, count ->
             val passwordInputLayout = binding.passwordEditTextLayout
             if (text.isNullOrEmpty() || text.length < 8) {
@@ -43,6 +51,10 @@ class SignupActivity : AppCompatActivity() {
         setupAction()
         playAnimation()
         observeViewModel()
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
     private fun setupView() {

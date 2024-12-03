@@ -12,7 +12,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
-import com.dicoding.picodiploma.loginwithanimation.data.pref.UserModel
 import com.dicoding.picodiploma.loginwithanimation.databinding.ActivityLoginBinding
 import com.dicoding.picodiploma.loginwithanimation.view.ViewModelFactory
 import com.dicoding.picodiploma.loginwithanimation.view.main.MainActivity
@@ -29,7 +28,16 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.passwordEditText.doOnTextChanged { text, start, before, count ->
+        binding.emailEditText.doOnTextChanged { text, _, _, _ ->
+            val emailInputLayout = binding.emailEditTextLayout
+            if (!isValidEmail(text.toString())) {
+                emailInputLayout.error = "Email tidak valid"
+            } else {
+                emailInputLayout.error = null
+            }
+        }
+
+        binding.passwordEditText.doOnTextChanged {  text, _, _, _ ->
             val passwordInputLayout = binding.passwordEditTextLayout
             if (text.isNullOrEmpty() || text.length < 8) {
                 passwordInputLayout.error = "Password tidak boleh kurang dari 8 karakter"
@@ -40,6 +48,10 @@ class LoginActivity : AppCompatActivity() {
         setupView()
         setupAction()
         playAnimation()
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
     private fun setupView() {

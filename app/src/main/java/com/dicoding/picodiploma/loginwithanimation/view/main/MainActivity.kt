@@ -17,6 +17,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dicoding.picodiploma.loginwithanimation.utils.Result
 import com.dicoding.picodiploma.loginwithanimation.view.detail.DetailActivity
+import com.dicoding.picodiploma.loginwithanimation.view.story.AddNewStory
 
 class MainActivity : AppCompatActivity() {
     private val viewModel by viewModels<MainViewModel> {
@@ -37,6 +38,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
+        binding.fabAdd.setOnClickListener {
+            val intent = Intent(this, AddNewStory::class.java)
+            startActivity(intent)
+        }
 
         setupRecyclerView()
         observeViewModel()
