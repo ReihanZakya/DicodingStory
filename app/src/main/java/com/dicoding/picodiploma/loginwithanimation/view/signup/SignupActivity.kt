@@ -5,44 +5,83 @@ import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Patterns
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.ViewModelProvider
 import com.dicoding.picodiploma.loginwithanimation.databinding.ActivitySignupBinding
 import com.dicoding.picodiploma.loginwithanimation.view.ViewModelFactory
 import com.dicoding.picodiploma.loginwithanimation.utils.Result
+import com.dicoding.picodiploma.loginwithanimation.view.customView.MyEditText
 import com.dicoding.picodiploma.loginwithanimation.view.login.LoginActivity
 
 class SignupActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySignupBinding
     private lateinit var signupViewModel: SignupViewModel
 
+    private lateinit var nameEditText: MyEditText
+    private lateinit var emailEditText: MyEditText
+    private lateinit var passwordEditText: MyEditText
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySignupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.emailEditText.doOnTextChanged { text, _, _, _ ->
-            val emailInputLayout = binding.emailEditTextLayout
-            if (!isValidEmail(text.toString())) {
-                emailInputLayout.error = "Email tidak valid"
-            } else {
-                emailInputLayout.error = null
-            }
-        }
+        nameEditText = binding.nameEditText
+        emailEditText = binding.emailEditText
+        passwordEditText = binding.passwordEditText
 
-        binding.passwordEditText.doOnTextChanged { text, start, before, count ->
-            val passwordInputLayout = binding.passwordEditTextLayout
-            if (text.isNullOrEmpty() || text.length < 8) {
-                passwordInputLayout.error = "Password tidak boleh kurang dari 8 karakter"
-            } else {
-                passwordInputLayout.error = null
+        nameEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val email = s.toString()
+                if (email.isEmpty()) {
+                    nameEditText.error = "Email tidak boleh kosong"
+                } else {
+                    nameEditText.error = null
+                }
             }
-        }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        emailEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val email = s.toString()
+                if (email.isEmpty()) {
+                    emailEditText.error = "Email tidak boleh kosong"
+                } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    emailEditText.error = "Email tidak valid"
+                } else {
+                    emailEditText.error = null
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        passwordEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val password = s.toString()
+                if (password.isEmpty()) {
+                    passwordEditText.error = "Password tidak boleh kosong"
+                } else if (password.length < 8) {
+                    passwordEditText.error = "Password harus lebih dari 8 karakter"
+                } else {
+                    passwordEditText.error = null
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
         val factory = ViewModelFactory.getInstance(this)
         signupViewModel = ViewModelProvider(this, factory)[SignupViewModel::class.java]
@@ -51,10 +90,6 @@ class SignupActivity : AppCompatActivity() {
         setupAction()
         playAnimation()
         observeViewModel()
-    }
-
-    private fun isValidEmail(email: String): Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
     private fun setupView() {
@@ -93,7 +128,6 @@ class SignupActivity : AppCompatActivity() {
         signupViewModel.registerResult.observe(this) { result ->
             when (result) {
                 is Result.Loading -> {
-                    // Tampilkan loading
                     binding.progressBar.visibility = View.VISIBLE
                 }
                 is Result.Success -> {
