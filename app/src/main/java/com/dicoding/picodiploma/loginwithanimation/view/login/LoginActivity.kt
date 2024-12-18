@@ -5,9 +5,6 @@ import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.Patterns
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -37,37 +34,14 @@ class LoginActivity : AppCompatActivity() {
         emailEditText = binding.emailEditText
         passwordEditText = binding.passwordEditText
 
-        emailEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val email = s.toString()
-                if (email.isEmpty()) {
-                    emailEditText.error = "Email tidak boleh kosong"
-                } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                    emailEditText.error = "Email tidak valid"
-                } else {
-                    emailEditText.error = null
-                }
-            }
+        val emailErrorText = binding.emailErrorText
+        val passwordErrorText = binding.passwordErrorText
 
-            override fun afterTextChanged(s: Editable?) {}
-        })
+        emailEditText.attachErrorTextView(emailErrorText)
+        passwordEditText.attachErrorTextView(passwordErrorText)
 
-        passwordEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val password = s.toString()
-                if (password.isEmpty()) {
-                    passwordEditText.error = "Password tidak boleh kosong"
-                } else if (password.length < 8) {
-                    passwordEditText.error = "Password harus lebih dari 8 karakter"
-                } else {
-                    passwordEditText.error = null
-                }
-            }
-
-            override fun afterTextChanged(s: Editable?) {}
-        })
+        emailEditText.setValidationType(MyEditText.ValidationType.EMAIL)
+        passwordEditText.setValidationType(MyEditText.ValidationType.PASSWORD)
 
         setupView()
         setupAction()

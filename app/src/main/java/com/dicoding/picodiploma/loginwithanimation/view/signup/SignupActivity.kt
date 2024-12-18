@@ -5,9 +5,6 @@ import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.Patterns
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -37,51 +34,17 @@ class SignupActivity : AppCompatActivity() {
         emailEditText = binding.emailEditText
         passwordEditText = binding.passwordEditText
 
-        nameEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val email = s.toString()
-                if (email.isEmpty()) {
-                    nameEditText.error = "Email tidak boleh kosong"
-                } else {
-                    nameEditText.error = null
-                }
-            }
+        val emailErrorText = binding.emailErrorText
+        val passwordErrorText = binding.passwordErrorText
+        val nameErrorText = binding.nameErrorText
 
-            override fun afterTextChanged(s: Editable?) {}
-        })
+        nameEditText.attachErrorTextView(nameErrorText)
+        emailEditText.attachErrorTextView(emailErrorText)
+        passwordEditText.attachErrorTextView(passwordErrorText)
 
-        emailEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val email = s.toString()
-                if (email.isEmpty()) {
-                    emailEditText.error = "Email tidak boleh kosong"
-                } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                    emailEditText.error = "Email tidak valid"
-                } else {
-                    emailEditText.error = null
-                }
-            }
-
-            override fun afterTextChanged(s: Editable?) {}
-        })
-
-        passwordEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val password = s.toString()
-                if (password.isEmpty()) {
-                    passwordEditText.error = "Password tidak boleh kosong"
-                } else if (password.length < 8) {
-                    passwordEditText.error = "Password harus lebih dari 8 karakter"
-                } else {
-                    passwordEditText.error = null
-                }
-            }
-
-            override fun afterTextChanged(s: Editable?) {}
-        })
+        nameEditText.setValidationType(MyEditText.ValidationType.NAME)
+        emailEditText.setValidationType(MyEditText.ValidationType.EMAIL)
+        passwordEditText.setValidationType(MyEditText.ValidationType.PASSWORD)
 
         val factory = ViewModelFactory.getInstance(this)
         signupViewModel = ViewModelProvider(this, factory)[SignupViewModel::class.java]
@@ -111,16 +74,8 @@ class SignupActivity : AppCompatActivity() {
             val email = binding.emailEditText.text.toString()
             val password = binding.passwordEditText.text.toString()
 
-            when {
-                name.isEmpty() -> binding.nameEditTextLayout.error = "Nama tidak boleh kosong"
-                email.isEmpty() -> binding.emailEditTextLayout.error = "Email tidak boleh kosong"
-                password.isEmpty() -> binding.passwordEditTextLayout.error = "Password tidak boleh kosong"
-                password.length < 8 -> binding.passwordEditTextLayout.error =
-                    "Password harus lebih dari 8 karakter"
-                else -> {
-                    signupViewModel.register(name, email, password)
-                }
-            }
+            signupViewModel.register(name, email, password)
+
         }
     }
 
