@@ -8,15 +8,19 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import androidx.paging.LoadState
 import com.dicoding.picodiploma.loginwithanimation.databinding.ActivityMainBinding
 import com.dicoding.picodiploma.loginwithanimation.view.ViewModelFactory
 import com.dicoding.picodiploma.loginwithanimation.view.welcome.WelcomeActivity
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.dicoding.picodiploma.loginwithanimation.R
 import com.dicoding.picodiploma.loginwithanimation.utils.Result
 import com.dicoding.picodiploma.loginwithanimation.view.detail.DetailActivity
+import com.dicoding.picodiploma.loginwithanimation.view.maps.MapsActivity
 import com.dicoding.picodiploma.loginwithanimation.view.story.AddNewStory
 
 class MainActivity : AppCompatActivity() {
@@ -44,11 +48,32 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        binding.topAppBar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_logout -> {
+                    viewModel.logout()
+                    true
+                }
+
+                R.id.action_map -> {
+                    viewModel.stories.value?.let { result ->
+                        if (result is Result.Success) {
+                            val intent = Intent(this@MainActivity, MapsActivity::class.java)
+                            intent.putParcelableArrayListExtra("story_data", ArrayList(result.data))
+                            startActivity(intent)
+                        }
+                    }
+                    true
+                }
+
+                else -> false
+            }
+        }
+
         setupRecyclerView()
         observeViewModel()
         viewModel.getStories()
         setupView()
-        setupAction()
         playAnimation()
     }
 
@@ -58,24 +83,29 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("story_item", story)
             startActivity(intent)
         }
+        val footerAdapter = LoadingStateAdapter { adapter.retry() }
+
         binding.rvStory.layoutManager = LinearLayoutManager(this)
-        binding.rvStory.adapter = adapter
+        binding.rvStory.adapter = adapter.withLoadStateFooter(footer = footerAdapter)
+
+        adapter.addLoadStateListener { loadState ->
+            binding.progressBar.isVisible = loadState.source.refresh is LoadState.Loading
+            if (loadState.source.refresh is LoadState.Error) {
+                val error = (loadState.source.refresh as LoadState.Error).error
+                Toast.makeText(this, error.localizedMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun observeViewModel() {
-        viewModel.stories.observe(this) { result ->
-            when (result) {
-                is Result.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
+        viewModel.getSession().observe(this) { user ->
+            if (user.isLogin) {
+                viewModel.getStoriesPaging(user.token).observe(this) { pagingData ->
+                    adapter.submitData(lifecycle, pagingData)
                 }
-                is Result.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    adapter.setStories(result.data)
-                }
-                is Result.Error -> {
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(this, result.error, Toast.LENGTH_SHORT).show()
-                }
+            } else {
+                startActivity(Intent(this, WelcomeActivity::class.java))
+                finish()
             }
         }
     }
@@ -90,14 +120,8 @@ class MainActivity : AppCompatActivity() {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
             )
         }
-        supportActionBar?.hide()
     }
 
-    private fun setupAction() {
-        binding.logoutButton.setOnClickListener {
-            viewModel.logout()
-        }
-    }
 
     private fun playAnimation() {
         ObjectAnimator.ofFloat(binding.imageView, View.TRANSLATION_X, -30f, 30f).apply {
@@ -106,13 +130,12 @@ class MainActivity : AppCompatActivity() {
             repeatMode = ObjectAnimator.REVERSE
         }.start()
 
-        val name = ObjectAnimator.ofFloat(binding.nameTextView, View.ALPHA, 1f).setDuration(100)
         val message = ObjectAnimator.ofFloat(binding.messageTextView, View.ALPHA, 1f).setDuration(100)
-        val logout = ObjectAnimator.ofFloat(binding.logoutButton, View.ALPHA, 1f).setDuration(100)
 
         AnimatorSet().apply {
-            playSequentially(name, message, logout)
+            playSequentially( message)
             startDelay = 100
         }.start()
     }
+
 }

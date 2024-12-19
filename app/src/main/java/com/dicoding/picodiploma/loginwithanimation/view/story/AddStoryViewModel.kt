@@ -23,8 +23,8 @@ class AddStoryViewModel(private val repository: UserRepository) : ViewModel() {
         token: String,
         description: String,
         photoFile: File,
-        lat: Float? = null,
-        lon: Float? = null
+        lat: Double? = -7.002833,
+        lon: Double? = 107.572544
     ) {
         viewModelScope.launch {
             _uploadResult.postValue(Result.Loading)

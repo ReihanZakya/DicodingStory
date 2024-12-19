@@ -17,4 +17,8 @@
     <string name="kamera">Kamera</string>
     <string name="deskripsi">Deskripsi</string>
     <string name="upload">Upload</string>
+    <string name="action_map">Maps</string>
+    <string name="action_logout">Logout</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="retry">Coba lagi</string>
 </resources>

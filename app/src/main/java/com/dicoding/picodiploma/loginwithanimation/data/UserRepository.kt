@@ -1,7 +1,11 @@
 package com.dicoding.picodiploma.loginwithanimation.data
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import com.dicoding.picodiploma.loginwithanimation.data.paging.StoryPagingSource
 import com.dicoding.picodiploma.loginwithanimation.data.pref.UserModel
 import com.dicoding.picodiploma.loginwithanimation.data.pref.UserPreference
+import com.dicoding.picodiploma.loginwithanimation.data.response.ListStoryItem
 import com.dicoding.picodiploma.loginwithanimation.data.response.LoginResponse
 import com.dicoding.picodiploma.loginwithanimation.data.response.RegisterResponse
 import com.dicoding.picodiploma.loginwithanimation.data.response.StoryResponse
@@ -34,6 +38,16 @@ class UserRepository private constructor(
             val errorResponse = Gson().fromJson(errorBody, LoginResponse::class.java)
             throw Exception(errorResponse.message ?: "Unknown error occurred")
         }
+    }
+
+    fun getStoriesPaging(token: String): Pager<Int, ListStoryItem> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 10,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = { StoryPagingSource(apiService, token) }
+        )
     }
 
     suspend fun getStories(token: String, page: Int?, size: Int?, location: Int): StoryResponse {

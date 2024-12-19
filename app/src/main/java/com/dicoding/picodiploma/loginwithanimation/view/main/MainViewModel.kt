@@ -5,6 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.dicoding.picodiploma.loginwithanimation.data.UserRepository
 import com.dicoding.picodiploma.loginwithanimation.data.pref.UserModel
 import com.dicoding.picodiploma.loginwithanimation.data.response.ListStoryItem
@@ -28,6 +30,10 @@ class MainViewModel(private val repository: UserRepository) : ViewModel() {
                 _stories.postValue(Result.Error(e.message.toString()))
             }
         }
+    }
+
+    fun getStoriesPaging(token: String): LiveData<PagingData<ListStoryItem>> {
+        return repository.getStoriesPaging(token).flow.cachedIn(viewModelScope).asLiveData()
     }
 
     fun getSession(): LiveData<UserModel> {
